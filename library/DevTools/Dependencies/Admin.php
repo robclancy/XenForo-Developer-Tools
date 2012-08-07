@@ -4,7 +4,17 @@ class DevTools_Dependencies_Admin extends XFCP_DevTools_Dependencies_Admin
 {
 	protected function _handleCustomPreloadedData(array &$data)
 	{
-		$dir = new DirectoryIterator(XenForo_Application::getInstance()->getRootDir() . '/templates/admin');
+		$templateFileModel = XenForo_Model::create('DevTools_Model_TemplateFile');
+
+		$templateFileModel->detectFileChanges(-1);
+
+
+
+
+
+		//XenForo_Model::create('DevTools_Model_TemplateFile')->writeTemplatesToFileSystem();
+
+		/*$dir = new DirectoryIterator(XenForo_Application::getInstance()->getRootDir() . '/templates/admin');
 		$files = array();
 		$newFiles = array();
 		foreach ($dir AS $file)
@@ -51,7 +61,7 @@ class DevTools_Dependencies_Admin extends XFCP_DevTools_Dependencies_Admin
 			);
 		}
 
-		XenForo_Template_Admin::setTemplateFiles($files);
+		XenForo_Template_Admin::setTemplateFiles($files);*/
 
 		parent::_handleCustomPreloadedData($data);
 	}

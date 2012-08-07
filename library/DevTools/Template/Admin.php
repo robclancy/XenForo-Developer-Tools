@@ -10,7 +10,7 @@ class DevTools_Template_Admin extends XFCP_DevTools_Template_Admin
 
 	public function __construct($templateName, array $params = array())
 	{
-		if (!isset(self::$_fileTemplateCache[$templateName]))
+		/*if (!isset(self::$_fileTemplateCache[$templateName]))
 		{
 			$template = $this->_getTemplateByTitle($templateName);
 			if ($template && isset(self::$_templateFiles[$template['template_id']]) && self::$_templateFiles[$template['template_id']]['title'] != $templateName)
@@ -69,7 +69,7 @@ class DevTools_Template_Admin extends XFCP_DevTools_Template_Admin
 			}
 
 			self::$_fileTemplateCache[$templateName] = true;
-		}
+		}*/
 
 		parent::__construct($templateName, $params);
 	}

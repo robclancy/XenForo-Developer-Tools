@@ -1,25 +1,48 @@
 <?php
 
-class DevTools_Helper_TemplateFile
+abstract class DevTools_Helper_TemplateFile
 {
-	public static function createPublicFile($path, $templateName, $styleId)
+	public static function write($filePath, $contents, array $attributes = array(), $flags = 0)
 	{
-		$templateModel = XenForo_Model::create('XenForo_Model_Template');
+		// Go 3 deep to make sure folders exist - this looks stupid lol
+		XenForo_Helper_File::createDirectory(dirname(dirname(dirname($filePath))));
+		XenForo_Helper_File::createDirectory(dirname(dirname(($filePath))));
+		XenForo_Helper_File::createDirectory(dirname($filePath));
+
+		if (file_exists($filePath))
+		{
+			if (!isset($attributes['id']) || xattr_get($filePath, 'id') != $attributes['id'])
+			{
+				return false;
+			}
+		}
+
+		if (!file_put_contents($filePath, $contents))
+		{
+			return false;
+		}
+
+		foreach ($attributes AS $name => $value)
+		{
+			xattr_set($filePath, $name, $value, $flags);
+		}
+
+		XenForo_Helper_File::makeWritableByFtpUser($filePath);
+
+		return true;
 	}
 
-	public static function createAdminFile($path, array $template)
+	public static function unlink($filePath, $backup = true)
 	{
-		if (!$template)
-		{
-			return false;
-		}
+	}
 
-		if (file_put_contents($path, $template['template']) === false)
-		{
-			return false;
-		}
+	public static function updateAttribute($filePath, $name, $value, $flags = 0)
+	{
+		XenForo_Helper_File::makeWritableByFtpUser($filePath);
+		xattr_set($filePath, $name, $value, $flags);
+	}
 
-		XenForo_Helper_File::makeWritableByFtpUser($path);
-		return true;
+	public static function getFiles($path)
+	{
 	}
 }

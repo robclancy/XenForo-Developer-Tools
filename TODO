@@ -1,0 +1,9 @@
+File System Templates TODO
+- only check templates that are used for content changes
+- add install script
+- add post save and post delete functionality to datawriters to update files when the ACP side saves
+- make template folder configurable
+- fix file/folder permission issues
+- detect xattr and limit functionality accordingly
+- add pre-export addon code to make sure no templates are missed
+- add support for other styles

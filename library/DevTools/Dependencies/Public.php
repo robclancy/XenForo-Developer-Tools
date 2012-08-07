@@ -1,0 +1,13 @@
+<?php
+
+class DevTools_Dependencies_Public extends XFCP_DevTools_Dependencies_Public
+{
+	protected function _handleCustomPreloadedData(array &$data)
+	{
+		$templateFileModel = XenForo_Model::create('DevTools_Model_TemplateFile');
+
+		$templateFileModel->detectFileChanges(0, true);
+
+		parent::_handleCustomPreloadedData($data);
+	}
+}

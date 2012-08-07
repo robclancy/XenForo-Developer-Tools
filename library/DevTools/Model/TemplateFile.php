@@ -49,7 +49,9 @@ class DevTools_Model_TemplateFile extends XenForo_Model
 					$filePath .= $template['addon_id'] . '/';
 				}
 
-				DevTools_Helper_TemplateFile::write($filePath . $this->addFileExtension($template['title']), $template['template'], array('id' => $template['template_id']));
+				$filePath .= $this->addFileExtension($template['title']);
+				DevTools_Helper_TemplateFile::write($filePath, $template['template'], array('id' => $template['template_id']));
+				$this->updateLastUpdateTime($template, filemtime($filePath));
 			}
 		}
 
@@ -110,7 +112,8 @@ class DevTools_Model_TemplateFile extends XenForo_Model
 									'templateId' => (int) xattr_get($addon->getPathname(), 'id'),
 									'addonId' => '',
 									'styleId' => $styleId,
-									'path' => $addon->getPathname()
+									'path' => $addon->getPathname(),
+									'mTime' => filemtime($addon->getPathname())
 								);
 							}
 						}
@@ -131,7 +134,8 @@ class DevTools_Model_TemplateFile extends XenForo_Model
 										'templateId' => (int) xattr_get($file->getPathname(), 'id'),
 										'addonId' => $addon->getFilename(),
 										'styleId' => $styleId,
-										'path' => $file->getPathname()
+										'path' => $file->getPathname(),
+										'mTime' => filemtime($file->getPathname())
 									);
 								}
 							}
@@ -181,6 +185,17 @@ class DevTools_Model_TemplateFile extends XenForo_Model
 		return $this->_templates[$styleId];
 	}
 
+	public function getTemplateById($styleId, $templateId)
+	{
+		$templates = $this->getTemplates($styleId);
+		if (isset($templates[$templateId]))
+		{
+			return $templates[$templateId];
+		}
+
+		return false;
+	}
+
 	// TODO: lots of duplicate code here, should probably flatten the array or a new method
 	public function detectFileChanges($styleId, $detectModified = false)
 	{
@@ -203,20 +218,26 @@ class DevTools_Model_TemplateFile extends XenForo_Model
 					print_r($file);
 					continue;
 				}
-				// Renamed
-				else if ($templates[$file['templateId']]['title'] != $file['title'])
+				else
 				{
-					$this->rename($templates[$file['templateId']], $file['title']);
-				}
-				// Addon changed
-				else if ($templates[$file['templateId']]['addon_id'] != $file['addonId'])
-				{
-					$this->changeAddon($templates[$file['templateId']], $file['addonId']);
-				}
 
-				// Mark the file as existing otherwise it gets deleted later
-				if (isset($templates[$file['templateId']]))
-				{
+					if ($detectModified && $file['mTime'] > $templates[$file['templateId']]['last_file_update'])
+					{
+						$this->updateModifiedTemplate($file['styleId'], $file['templateId'], $file['path']);
+					}
+
+					// Renamed
+					if ($templates[$file['templateId']]['title'] != $file['title'])
+					{
+						$this->rename($templates[$file['templateId']], $file['title']);
+					}
+					// Addon changed
+					if ($templates[$file['templateId']]['addon_id'] != $file['addonId'])
+					{
+						$this->changeAddon($templates[$file['templateId']], $file['addonId']);
+					}
+
+					// Mark the file as existing otherwise it gets deleted later
 					$templates[$file['templateId']]['exists'] = true;
 				}
 			}
@@ -234,21 +255,25 @@ class DevTools_Model_TemplateFile extends XenForo_Model
 					{
 						continue;
 					}
-					// Renamed
-					else if ($templates[$f['templateId']]['title'] != $f['title'])
+					else
 					{
-						$this->rename($templates[$f['templateId']], $f['title']);
-						$templates[$f['templateId']]['exists'] = true;
-					}
-					// Addon changed
-					else if ($templates[$f['templateId']]['addon_id'] != $f['addonId'])
-					{
-						$this->changeAddon($templates[$f['templateId']], $f['addonId']);
-					}
+						if ($detectModified && $f['mTime'] > $templates[$f['templateId']]['last_file_update'])
+						{
+							$this->updateModifiedTemplate($f['styleId'], $f['templateId'], $f['path']);
+						}
 
-					// Mark the file as existing otherwise it gets deleted later
-					if (isset($templates[$f['templateId']]))
-					{
+						// Renamed
+						if ($templates[$f['templateId']]['title'] != $f['title'])
+						{
+							$this->rename($templates[$f['templateId']], $f['title']);
+						}
+						// Addon changed
+						if ($templates[$f['templateId']]['addon_id'] != $f['addonId'])
+						{
+							$this->changeAddon($templates[$f['templateId']], $f['addonId']);
+						}
+
+						// Mark the file as existing otherwise it gets deleted later
 						$templates[$f['templateId']]['exists'] = true;
 					}
 				}
@@ -270,8 +295,42 @@ class DevTools_Model_TemplateFile extends XenForo_Model
 		}
 	}
 
-	public function updateModifiedTemplate($path)
+	public function updateModifiedTemplate($styleId, $templateId, $filePath)
 	{
+		$template = $this->getTemplateById($styleId, $templateId);
+		if (($mTime = filemtime($filePath)) > $template['last_file_update'])
+		{
+			$contents = file_get_contents($filePath);
+
+			$propertyPreSave = $this->_stylePropertiesPreSave($styleId, $contents);
+
+			if ($styleId == -1)
+			{
+				$writer = XenForo_DataWriter::create('XenForo_DataWriter_AdminTemplate');
+			}
+			else
+			{
+				$writer = XenForo_DataWriter::create('XenForo_DataWriter_Template');
+				$writer->set('style_id', $styleId);
+			}
+			$writer->set('template', $contents);
+			$writer->setExistingData($templateId);
+			$writer->save();
+
+			$this->_stylePropertiesPostSave($styleId, $propertyPreSave[0], $propertyPreSave[1]);
+
+			$this->updateLastUpdateTime($template, $mTime);
+		}
+	}
+
+	public function updateLastUpdateTime(array $template, $time)
+	{
+		// TODO: update datawriter properly and use it
+		$this->_getDb()->query('
+			UPDATE xf_' . ($template['style_id'] == -1 ? 'admin_' : '') . 'template
+			SET last_file_update = ?
+			WHERE template_id = ?
+		', array($time, $template['template_id']));
 	}
 
 	public function insert($templateName, $contents, $styleId, $addonId)
@@ -317,8 +376,8 @@ class DevTools_Model_TemplateFile extends XenForo_Model
 	{
 		if ($newAddonId != 'XenForo' && !$this->getModelFromCache('XenForo_Model_AddOn')->getAddonById($newAddonId))
 		{
-			// addon doesn't exist, lets just return
-			return;
+			// addon doesn't exist, lets clear it
+			$newAddonId = '';
 		}
 
 		if ($template['style_id'] == -1)
@@ -351,10 +410,6 @@ class DevTools_Model_TemplateFile extends XenForo_Model
 	protected function _stylePropertiesPostSave($styleId, $changes, $properties)
 	{
 		$this->getModelFromCache('XenForo_Model_StyleProperty')->saveStylePropertiesInStyleFromTemplate($styleId, $changes, $properties);
-	}
-
-	public function update($templateId, $templateName, $contents, $addonId)
-	{
 	}
 
 	public function delete(array $template)

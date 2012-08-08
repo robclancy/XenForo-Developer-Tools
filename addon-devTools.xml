@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<addon addon_id="devTools" title="Dev Tools" version_string="0.0.1" version_id="1" url="http://mercenarydesign.com.au" install_callback_class="DevTools_Installer" install_callback_method="install" uninstall_callback_class="DevTools_Installer" uninstall_callback_method="uninstall">
+  <admin_navigation/>
+  <admin_permissions/>
+  <admin_style_properties/>
+  <admin_templates/>
+  <code_events/>
+  <code_event_listeners/>
+  <cron/>
+  <email_templates/>
+  <optiongroups/>
+  <permissions>
+    <permission_groups/>
+    <permissions/>
+    <interface_groups/>
+  </permissions>
+  <phrases/>
+  <route_prefixes/>
+  <style_properties/>
+  <templates/>
+  <bb_code_media_sites/>
+</addon>

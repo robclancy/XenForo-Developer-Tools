@@ -4,10 +4,9 @@ abstract class DevTools_Helper_TemplateFile
 {
 	public static function write($filePath, $contents, array $attributes = array(), $flags = 0)
 	{
-		// Go 3 deep to make sure folders exist - this looks stupid lol
-		XenForo_Helper_File::createDirectory(dirname(dirname(dirname($filePath))));
-		XenForo_Helper_File::createDirectory(dirname(dirname(($filePath))));
 		XenForo_Helper_File::createDirectory(dirname($filePath));
+		XenForo_Helper_File::makeWritableByFtpUser(dirname($filePath));
+		XenForo_Helper_File::makeWritableByFtpUser(dirname(dirname($filePath)));
 
 		if (file_exists($filePath))
 		{
@@ -17,9 +16,19 @@ abstract class DevTools_Helper_TemplateFile
 			}
 		}
 
-		if (!file_put_contents($filePath, $contents))
+		if (empty($contents))
 		{
-			return false;
+			if (!touch($filePath))
+			{
+				return false;
+			}
+		}
+		else
+		{
+			if (!file_put_contents($filePath, $contents))
+			{
+				return false;
+			}
 		}
 
 		foreach ($attributes AS $name => $value)
@@ -32,17 +41,9 @@ abstract class DevTools_Helper_TemplateFile
 		return true;
 	}
 
-	public static function unlink($filePath, $backup = true)
-	{
-	}
-
 	public static function updateAttribute($filePath, $name, $value, $flags = 0)
 	{
 		XenForo_Helper_File::makeWritableByFtpUser($filePath);
 		xattr_set($filePath, $name, $value, $flags);
-	}
-
-	public static function getFiles($path)
-	{
 	}
 }

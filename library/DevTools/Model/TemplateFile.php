@@ -9,10 +9,11 @@ class DevTools_Model_TemplateFile extends XenForo_Model
 	public function writeTemplatesToFileSystem()
 	{
 		$styles = array(-1 => 'admin', 0 => 'master');
+		/* TODO: other styles
 		$styles += $this->_getDb()->fetchPairs('
 			SELECT style_id, title
 			FROM xf_style
-		');
+		');*/
 
 		$templates = array();
 		foreach ($styles AS $style => $title)
@@ -294,6 +295,8 @@ class DevTools_Model_TemplateFile extends XenForo_Model
 			}
 		}
 	}
+
+	// TODO: create a getWriter($styleId) method
 
 	public function updateModifiedTemplate($styleId, $templateId, $filePath)
 	{

@@ -18,7 +18,7 @@ class DevTools_Installer
 		}
 		catch (Exception $e) {}
 		
-		$this->writeTemplateFiles();
+		self::writeTemplateFiles();
 	}
 	
 	/**

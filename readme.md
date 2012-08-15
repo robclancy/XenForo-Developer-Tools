@@ -4,7 +4,7 @@ NOTE: this is currently alpha, use at your own risk... this has the potential to
 
 XenForo Developer Tools is a set of tools I created for myself to remove a lot of the tedious things that come with developing with XenForo. It is designed to work in conjuction with XenForo-CLI (github.com/Naatan/XenForo-CLI/). 
 
-# Project Stats
+# Project Status
 
 Current features are subject to heavy change and could be plain old broke. These tools are designed to be used by developers on a development enviroment. When things are needed they will be added and pull requests will be considered.
 

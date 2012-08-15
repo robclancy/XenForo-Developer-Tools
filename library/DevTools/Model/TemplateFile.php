@@ -310,10 +310,12 @@ class DevTools_Model_TemplateFile extends XenForo_Model
 			if ($styleId == -1)
 			{
 				$writer = XenForo_DataWriter::create('XenForo_DataWriter_AdminTemplate');
+				$writer->setOption(XenForo_DataWriter_AdminTemplate::OPTION_DATA_FROM_FILE, true);
 			}
 			else
 			{
 				$writer = XenForo_DataWriter::create('XenForo_DataWriter_Template');
+				$writer->setOption(XenForo_DataWriter_Template::OPTION_DATA_FROM_FILE, true);
 				$writer->set('style_id', $styleId);
 			}
 			$writer->set('template', $contents);
@@ -343,10 +345,12 @@ class DevTools_Model_TemplateFile extends XenForo_Model
 		if ($styleId == -1)
 		{
 			$writer = XenForo_DataWriter::create('XenForo_DataWriter_AdminTemplate');
+			$writer->setOption(XenForo_DataWriter_AdminTemplate::OPTION_DATA_FROM_FILE, true);
 		}
 		else
 		{
 			$writer = XenForo_DataWriter::create('XenForo_DataWriter_Template');
+			$writer->setOption(XenForo_DataWriter_Template::OPTION_DATA_FROM_FILE, true);
 			$writer->set('style_id', $styleId);
 		}
 		$writer->set('template', $contents);
@@ -364,10 +368,12 @@ class DevTools_Model_TemplateFile extends XenForo_Model
 		if ($template['style_id'] == -1)
 		{
 			$writer = XenForo_DataWriter::create('XenForo_DataWriter_AdminTemplate');
+			$writer->setOption(XenForo_DataWriter_AdminTemplate::OPTION_DATA_FROM_FILE, true);
 		}
 		else
 		{
 			$writer = XenForo_DataWriter::create('XenForo_DataWriter_Template');
+			$writer->setOption(XenForo_DataWriter_Template::OPTION_DATA_FROM_FILE, true);
 		}
 
 		$writer->setExistingData($template['template_id']);
@@ -386,10 +392,12 @@ class DevTools_Model_TemplateFile extends XenForo_Model
 		if ($template['style_id'] == -1)
 		{
 			$writer = XenForo_DataWriter::create('XenForo_DataWriter_AdminTemplate');
+			$writer->setOption(XenForo_DataWriter_AdminTemplate::OPTION_DATA_FROM_FILE, true);
 		}
 		else
 		{
 			$writer = XenForo_DataWriter::create('XenForo_DataWriter_Template');
+			$writer->setOption(XenForo_DataWriter_Template::OPTION_DATA_FROM_FILE, true);
 		}
 
 		$writer->setExistingData($template['template_id']);
@@ -447,10 +455,12 @@ class DevTools_Model_TemplateFile extends XenForo_Model
 		if ($template['style_id'] == -1)
 		{
 			$writer = XenForo_DataWriter::create('XenForo_DataWriter_AdminTemplate');
+			$writer->setOption(XenForo_DataWriter_AdminTemplate::OPTION_DATA_FROM_FILE, true);
 		}
 		else
 		{
 			$writer = XenForo_DataWriter::create('XenForo_DataWriter_Template');
+			$writer->setOption(XenForo_DataWriter_Template::OPTION_DATA_FROM_FILE, true);
 		}
 
 		$writer->setExistingData($template['template_id']);

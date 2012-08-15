@@ -8,6 +8,8 @@ class DevTools_Model_TemplateFile extends XenForo_Model
 
 	public function writeTemplatesToFileSystem()
 	{
+		new DevTools_Helper_Xattr;
+		
 		$styles = array(-1 => 'admin', 0 => 'master');
 		/* TODO: other styles
 		$styles += $this->_getDb()->fetchPairs('

@@ -1,11 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
-<addon addon_id="devTools" title="Dev Tools" version_string="0.0.1" version_id="1" url="http://mercenarydesign.com.au" install_callback_class="DevTools_Installer" install_callback_method="install" uninstall_callback_class="DevTools_Installer" uninstall_callback_method="uninstall">
+<addon addon_id="devTools" title="Dev Tools" version_string="0.0.2" version_id="2" url="http://mercenarydesign.com.au" install_callback_class="DevTools_Installer" install_callback_method="install" uninstall_callback_class="DevTools_Installer" uninstall_callback_method="uninstall">
   <admin_navigation/>
   <admin_permissions/>
   <admin_style_properties/>
   <admin_templates/>
   <code_events/>
-  <code_event_listeners/>
+  <code_event_listeners>
+    <listener event_id="load_class_route_prefix" execute_order="10" callback_class="DevTools_Listen" callback_method="load_class_model" active="1" description=""/>
+  </code_event_listeners>
   <cron/>
   <email_templates/>
   <optiongroups/>
@@ -19,4 +21,5 @@
   <style_properties/>
   <templates/>
   <bb_code_media_sites/>
+  <template_modifications/>
 </addon>

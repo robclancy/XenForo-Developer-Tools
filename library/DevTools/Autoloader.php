@@ -6,6 +6,7 @@
 * @var boolean
 */
 define('XENFORO_AUTOLOADER_SETUP', true);
+define('DEVTOOLS_AUTOLOADER_SETUP', true);
 
 class XenForo_Autoloader
 {
@@ -51,8 +52,10 @@ class XenForo_Autoloader
 
 		$this->_rootDir = $rootDir;
 		$this->_setupAutoloader();
-
+		
 		$this->_setup = true;
+		
+		new DevTools_Helper_Xattr;
 	}
 
 	/**

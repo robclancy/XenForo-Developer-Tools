@@ -1,9 +1,18 @@
-File System Templates TODO
-- only check templates that are used for content changes
-- add install script
-- add post save and post delete functionality to datawriters to update files when the ACP side saves
+File System Templates
 - make template folder configurable
 - fix file/folder permission issues
-- detect xattr and limit functionality accordingly
+- detect xattr and limit functionality accordingly (maybe)
 - add pre-export addon code to make sure no templates are missed
 - add support for other styles
+
+Addons
+- add a working addon dropbox to top of site
+- add various quick add links to the top to add things like phrases, routes, listeners etc
+- add extra addon dev options. Things like paths (so we can do build functionality creating hashes for files etc)
+- add the ability to call a script pre and post build
+- add ability to only show certain addons when viewing lists
+
+Phrases
+- add postsave template checks for new phrases
+- add a file scanning system (needs the paths from above to be efficient)
+- add a page where you can bulk create all the missing phrases

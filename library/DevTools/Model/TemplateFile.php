@@ -9,7 +9,7 @@ class DevTools_Model_TemplateFile extends XenForo_Model
 	public function writeTemplatesToFileSystem()
 	{
 		new DevTools_Helper_Xattr;
-		
+
 		$styles = array(-1 => 'admin', 0 => 'master');
 		/* TODO: other styles
 		$styles += $this->_getDb()->fetchPairs('
@@ -285,8 +285,10 @@ class DevTools_Model_TemplateFile extends XenForo_Model
 
 		foreach ($newFiles AS $file)
 		{
+			$this->printDebugInfo('Detected new template "' . $file['path'] . '"... ');
 			$templateId = $this->insert($file['title'], file_get_contents($file['path']), $file['styleId'], $file['addonId']);
 			DevTools_Helper_TemplateFile::updateAttribute($file['path'], 'id', $templateId);
+			$this->printDebugInfo("template added\n");
 		}
 
 		foreach ($templates AS $template)
@@ -305,6 +307,8 @@ class DevTools_Model_TemplateFile extends XenForo_Model
 		$template = $this->getTemplateById($styleId, $templateId);
 		if (($mTime = filemtime($filePath)) > $template['last_file_update'])
 		{
+			$this->printDebugInfo('Detected file changes in "' . $filePath . '"... ');
+
 			$contents = file_get_contents($filePath);
 
 			$propertyPreSave = $this->_stylePropertiesPreSave($styleId, $contents);
@@ -325,6 +329,8 @@ class DevTools_Model_TemplateFile extends XenForo_Model
 			$writer->save();
 
 			$this->_stylePropertiesPostSave($styleId, $propertyPreSave[0], $propertyPreSave[1]);
+
+			$this->printDebugInfo("template updated\n");
 
 			$this->updateLastUpdateTime($template, $mTime);
 		}
@@ -367,6 +373,8 @@ class DevTools_Model_TemplateFile extends XenForo_Model
 
 	public function rename(array $template, $newTitle)
 	{
+		$this->printDebugInfo('Detected file name change from "' . $template['title'] . '" to "' . $newtitle . '"... ');
+
 		if ($template['style_id'] == -1)
 		{
 			$writer = XenForo_DataWriter::create('XenForo_DataWriter_AdminTemplate');
@@ -381,10 +389,14 @@ class DevTools_Model_TemplateFile extends XenForo_Model
 		$writer->setExistingData($template['template_id']);
 		$writer->set('title', $newTitle);
 		$writer->save();
+
+		$this->printDebugInfo("renamed template\n");
 	}
 
 	public function changeAddon(array $template, $newAddonId)
 	{
+		$this->printDebugInfo('Detected file moved, changing addon from "' . $template['addon_id'] . '" to "' . $newAddonId . '"... ');
+
 		if ($newAddonId != 'XenForo' && !$this->getModelFromCache('XenForo_Model_AddOn')->getAddonById($newAddonId))
 		{
 			// addon doesn't exist, lets clear it
@@ -405,6 +417,8 @@ class DevTools_Model_TemplateFile extends XenForo_Model
 		$writer->setExistingData($template['template_id']);
 		$writer->set('addon_id', $newAddonId);
 		$writer->save();
+
+		$this->printDebugInfo("template updated\n");
 	}
 
 	protected function _stylePropertiesPreSave($styleId, $contents)
@@ -427,6 +441,8 @@ class DevTools_Model_TemplateFile extends XenForo_Model
 
 	public function delete(array $template)
 	{
+		$this->printDebugInfo('Detected file deleted (' .$template['title'] . ')... ');
+
 		// make a backup
 		$filePath = XenForo_Application::getInstance()->getRootDir() . '/templates/';
 		if ($template['style_id'] == -1)
@@ -453,6 +469,8 @@ class DevTools_Model_TemplateFile extends XenForo_Model
 
 		DevTools_Helper_TemplateFile::write($filePath, $template['template']);
 
+		$this->printDebugInfo('Backing up to "' . $filePath . '"... ');
+
 		// Delete from db
 		if ($template['style_id'] == -1)
 		{
@@ -467,6 +485,8 @@ class DevTools_Model_TemplateFile extends XenForo_Model
 
 		$writer->setExistingData($template['template_id']);
 		$writer->delete();
+
+		$this->printDebugInfo("template deleted\n");
 	}
 
 	public function addFileExtension($file)
@@ -477,5 +497,19 @@ class DevTools_Model_TemplateFile extends XenForo_Model
 		}
 
 		return $file;
+	}
+
+	// For CLI and debug use
+	public function printDebugInfo($str)
+	{
+		if ($this->showDebugInfo())
+		{
+			echo $str;
+		}
+	}
+
+	public function showDebugInfo()
+	{
+		return XenForo_Application::getConfig()->showDevToolsDebugInfo;
 	}
 }

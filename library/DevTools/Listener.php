@@ -6,6 +6,12 @@ class DevTools_Listener
 
 	public static function loadClass($class, array &$extend)
 	{
+		if (self::$_checked OR defined('DEVTOOLS_AUTOLOADER_SETUP'))
+		{
+			return;
+		}
+
+		// Note: the autoloader will extend these itself so we return above
 		$extendedClasses = array(
 			'XenForo_DataWriter_Template',
 			'XenForo_DataWriter_AdminTemplate'
@@ -18,11 +24,6 @@ class DevTools_Listener
 				// Do substr incase there is some class added at some point with XenForo in it twice
 				$extend[] = 'DevTools' . substr($class, 7);
 			}
-		}
-
-		if (self::$_checked OR defined('DEVTOOLS_AUTOLOADER_SETUP'))
-		{
-			return;
 		}
 
 		$paths 	= XenForo_Application::getInstance()->loadRequestPaths();

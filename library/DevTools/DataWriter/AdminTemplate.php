@@ -22,7 +22,7 @@ class DevTools_DataWriter_AdminTemplate extends XFCP_DevTools_DataWriter_AdminTe
 		}
 	}
 
-	public function _postDelete()
+	protected function _postDelete()
 	{
 		parent::_postDelete();
 

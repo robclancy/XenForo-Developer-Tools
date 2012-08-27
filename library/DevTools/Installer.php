@@ -17,11 +17,16 @@ class DevTools_Installer
 			$db->query('ALTER TABLE xf_template ADD COLUMN last_file_update INT UNSIGNED NOT NULL DEFAULT 0');
 		}
 		catch (Exception $e) {}
+<<<<<<< HEAD
 
 		if (!$existingAddon)
 		{
 			self::writeTemplateFiles();
 		}
+=======
+		
+		self::writeTemplateFiles();
+>>>>>>> 95fad80ccd231e80e4a96736d1d0347fa4bcbdac
 	}
 
 	/**

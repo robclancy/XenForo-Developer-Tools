@@ -2,7 +2,7 @@
 
 class DevTools_Installer
 {
-	public static function install()
+	public static function install($existingAddon, $addonData)
 	{
 		$db = XenForo_Application::getDb();
 
@@ -17,14 +17,17 @@ class DevTools_Installer
 			$db->query('ALTER TABLE xf_template ADD COLUMN last_file_update INT UNSIGNED NOT NULL DEFAULT 0');
 		}
 		catch (Exception $e) {}
-		
-		$this->writeTemplateFiles();
+
+		if (!$existingAddon)
+		{
+			self::writeTemplateFiles();
+		}
 	}
-	
+
 	/**
 	 * Placed in separate function so it can easily be called from cron jobs
-	 * 
-	 * @return void    
+	 *
+	 * @return void
 	 */
 	public static function writeTemplateFiles()
 	{

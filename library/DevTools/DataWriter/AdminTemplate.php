@@ -12,7 +12,7 @@ class DevTools_DataWriter_AdminTemplate extends XFCP_DevTools_DataWriter_AdminTe
 		return $options;
 	}
 
-	public function _postSave()
+	protected function _postSave()
 	{
 		parent::_postSave();
 

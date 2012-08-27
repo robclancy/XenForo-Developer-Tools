@@ -12,7 +12,7 @@ class DevTools_DataWriter_Template extends XFCP_DevTools_DataWriter_Template
 		return $options;
 	}
 
-	public function _postSave()
+	protected function _postSave()
 	{
 		parent::_postSave();
 

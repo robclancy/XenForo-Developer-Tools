@@ -52,9 +52,9 @@ class XenForo_Autoloader
 
 		$this->_rootDir = $rootDir;
 		$this->_setupAutoloader();
-		
+
 		$this->_setup = true;
-		
+
 		new DevTools_Helper_Xattr;
 	}
 

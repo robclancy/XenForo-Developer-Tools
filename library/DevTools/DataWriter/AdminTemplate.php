@@ -18,7 +18,7 @@ class DevTools_DataWriter_AdminTemplate extends XFCP_DevTools_DataWriter_AdminTe
 
 		if (!$this->getOption(self::OPTION_DATA_FROM_FILE))
 		{
-			DevTools_Helper_TemplateFile::templatePostSave($this, -1);
+			DevTools_File_Template_Admin::postDataWriterSave($this);
 		}
 	}
 
@@ -28,7 +28,7 @@ class DevTools_DataWriter_AdminTemplate extends XFCP_DevTools_DataWriter_AdminTe
 
 		if (!$this->getOption(self::OPTION_DATA_FROM_FILE))
 		{
-			DevTools_Helper_TemplateFile::templatePostDelete($this, -1);
+			DevTools_File_Template_Admin::postDataWriterDelete($this);
 		}
 	}
 }

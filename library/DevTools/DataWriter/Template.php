@@ -16,9 +16,9 @@ class DevTools_DataWriter_Template extends XFCP_DevTools_DataWriter_Template
 	{
 		parent::_postSave();
 
-		if (!$this->getOption(self::OPTION_DATA_FROM_FILE))
+		if (!$this->getOption(self::OPTION_DATA_FROM_FILE) AND $this->get('style_id') == 0)
 		{
-			DevTools_Helper_TemplateFile::templatePostSave($this, $this->get('style_id'));
+			DevTools_File_Template_Master::postDataWriterSave($this);
 		}
 	}
 
@@ -26,9 +26,9 @@ class DevTools_DataWriter_Template extends XFCP_DevTools_DataWriter_Template
 	{
 		parent::_postDelete();
 
-		if (!$this->getOption(self::OPTION_DATA_FROM_FILE))
+		if (!$this->getOption(self::OPTION_DATA_FROM_FILE) AND $this->get('style_id') == 0)
 		{
-			DevTools_Helper_TemplateFile::templatePostDelete($this, $this->get('style_id'));
+			DevTools_File_Template_Master::postDataWriterDelete($this);
 		}
 	}
 }

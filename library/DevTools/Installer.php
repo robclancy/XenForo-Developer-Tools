@@ -18,6 +18,12 @@ class DevTools_Installer
 		}
 		catch (Exception $e) {}
 
+		try
+		{
+			$db->query('ALTER TABLE xf_phrase ADD COLUMN last_file_update INT UNSIGNED NOT NULL DEFAULT 0');
+		}
+		catch (Exception $e) {}
+
 		if (!$existingAddon)
 		{
 			self::writeTemplateFiles();

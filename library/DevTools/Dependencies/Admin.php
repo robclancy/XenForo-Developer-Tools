@@ -4,9 +4,9 @@ class DevTools_Dependencies_Admin extends XFCP_DevTools_Dependencies_Admin
 {
 	protected function _handleCustomPreloadedData(array &$data)
 	{
-		$templateFileModel = XenForo_Model::create('DevTools_Model_TemplateFile');
+		//$templateFileModel = XenForo_Model::create('DevTools_Model_TemplateFile');
 
-		$templateFileModel->detectFileChanges(-1, true);
+		//$templateFileModel->detectFileChanges(-1, true);
 
 
 

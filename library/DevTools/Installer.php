@@ -37,8 +37,7 @@ class DevTools_Installer
 	 */
 	public static function writeTemplateFiles()
 	{
-		new DevTools_Helper_Xattr;
-		XenForo_Model::create('DevTools_Model_TemplateFile')->writeTemplatesToFileSystem();
+		XenForo_Model::create('DevTools_Model_File')->writeAllFiles();
 	}
 
 	public static function uninstall(){}

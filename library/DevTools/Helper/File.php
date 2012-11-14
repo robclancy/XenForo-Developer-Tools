@@ -10,13 +10,14 @@ abstract class DevTools_Helper_File
 		self::createDirectory(dirname($filePath));
 		self::makeWritableByFtpUser(dirname($filePath));
 
+		/* DEPREACTED: Attributes depracted
 		if (file_exists($filePath))
 		{
 			if (!isset($attributes['id']) || xattr_get($filePath, 'id') != $attributes['id'])
 			{
 				return false;
 			}
-		}
+		}*/
 
 		if (empty($contents))
 		{
@@ -33,10 +34,10 @@ abstract class DevTools_Helper_File
 			}
 		}
 
-		foreach ($attributes AS $name => $value)
+		/*foreach ($attributes AS $name => $value)
 		{
 			xattr_set($filePath, $name, $value, $flags);
-		}
+		}*/
 
 		self::makeWritableByFtpUser($filePath);
 
@@ -77,5 +78,25 @@ abstract class DevTools_Helper_File
 	public static function makeWritableByFtpUser($file)
 	{
 		return XenForo_Helper_File::makeWritableByFtpUser($file);
+	}
+
+	public static function getIdAndTitleFromFileName($fileName)
+	{
+		// Format for filenames is.. title.id.extra.extension
+		// So we check for first '.' and if there is a second one get what is inbetween for the id
+		// if it is an int that is it, if not it must be a new file
+
+		if (($pos = strpos($fileName, '.')) !== false)
+		{
+			$id = 0;
+			if (($pos2 = strpos($fileName, '.', $pos + 1)) !== false)
+			{
+				$id = (int) substr($fileName, $pos + 1, $pos2 - $pos);
+			}
+
+			return array(substr($fileName, 0, $pos), $id);
+		}
+
+		return array($fileName, 0);
 	}
 }

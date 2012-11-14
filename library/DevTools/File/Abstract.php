@@ -65,13 +65,13 @@ abstract class DevTools_File_Abstract
 	// NOTE: when the file doesn't exist make $this->_data false to mark it as deleted
 	protected function _loadFile()
 	{
-		if (!file_exists($this->_filePath))
+		if ( ! file_exists($this->_filePath))
 		{
 			if ($this->_id > 0)
 			{
 				foreach ($this->getOriginalFiles() AS $file)
 				{
-					$id = @xattr_get($file['filePath'], 'id');
+					list ($title, $id) = DevTools_Helper_File::getIdAndTitleFromFileName($file['fileName']);
 					if ($id == $this->_id)
 					{
 						$this->_filePath = $file['filePath'];
@@ -79,7 +79,7 @@ abstract class DevTools_File_Abstract
 				}
 			}
 
-			if (!file_exists($this->_filePath))
+			if ( ! file_exists($this->_filePath))
 			{
 				$this->_data = false;
 				return;
@@ -87,34 +87,34 @@ abstract class DevTools_File_Abstract
 		}
 
 		$file = new SplFileInfo($this->_filePath);
-		if (!$file->isFile() OR !$file->isReadable() OR !$file->isWritable())
+		if ( ! $file->isFile() OR ! $file->isReadable() OR ! $file->isWritable())
 		{
 			return;
 		}
 
+		list ($title, $id) = DevTools_Helper_File::getIdAndTitleFromFileName($file->getFilename());
 		$this->_data = array(
-			'id' => (int) xattr_get($file->getPathname(), 'id'),
-			'dbName' => xattr_get($file->getPathname(), 'dbName'),
+			'id' => $id,
+			'title' => $title,
 			'fileName' => $file->getFilename(),
 			'contents' => file_get_contents($file->getPathname()),
 			'lastModifiedTime' => $file->getMTime(),
 			'filePath' => $file->getPathname(),
-			'attributes' => $this->_getFileAttributes($file->getPathname()),
 		);
 	}
 
 	public function detectChangesAndUpdate()
 	{
-		if (!$this->isDeleted() AND !$this->isNewFile() AND !$this->_oldData('lastModifiedTime'))
+		if ( ! $this->isDeleted() AND ! $this->isNewFile() AND ! $this->_oldData('lastModifiedTime'))
 		{
 			$this->touchDb();
 			// Go to next load for this now
 			return;
 		}
 
-		if (!$this->detectFileChanged())
+		if ( ! $this->detectFileChanged())
 		{
-			if (! $this->detectFileDeleted())
+			if ( ! $this->detectFileDeleted())
 			{
 				$this->detectFileNew();
 			}
@@ -125,7 +125,7 @@ abstract class DevTools_File_Abstract
 	{
 		if ($this->isRenamed() OR $this->isMoved() OR $this->isModified())
 		{
-			if (!in_array($this->_data['id'], self::$_updatedFiles))
+			if ( ! in_array($this->_data['id'], self::$_updatedFiles))
 			{
 				$this->printDebugInfo('{datatype}: Detected file changes (' . $this->_oldData('fileName') . ")...\n");
 				if ($this->_updateFileInDb())
@@ -168,9 +168,10 @@ abstract class DevTools_File_Abstract
 			if ($id = $this->_insertFileToDb())
 			{
 				$this->printDebugInfo("- added to database ($id)\n");
-				xattr_set($this->_data['filePath'], 'id', $id);
-				xattr_set($this->_data['filePath'], 'dbName', XenForo_Application::getConfig()->db->dbname);
-				$this->printDebugInfo('- updated extended file attributes for "' . $this->_data['filePath'] . "\"\n\n");
+				$newFileName = $this->getFileName(array_merge($this->_data, array('id' => $id)));
+				rename($this->_data['filePath'], str_replace($this->_data['fileName'], '', $this->_data['filePath']) . self::$s . $newFileName);
+				$this->touchDb($id);
+				$this->printDebugInfo('- renamed file to "' . $newFileName . "\"\n\n");
 			}
 			return true;
 		}
@@ -195,8 +196,7 @@ abstract class DevTools_File_Abstract
 			return false;
 		}
 
-		// TODO: we need to check for the database name changing otherwise you will get lots of new templates or something
-		return empty($this->_data['id']) OR !$this->_oldData() OR $this->_data['dbName'] != XenForo_Application::getConfig()->db->dbname;
+		return empty($this->_data['id']) OR ! $this->_oldData();
 	}
 
 	public function isRenamed()
@@ -261,7 +261,7 @@ abstract class DevTools_File_Abstract
 		$this->trashFile($oldData);
 	}
 
-	abstract public function touchDb();
+	abstract public function touchDb($id = null);
 
 	public function trashFile(array $oldData)
 	{
@@ -374,6 +374,7 @@ abstract class DevTools_File_Abstract
 
 			$this->printDebugInfo($errorString);
 
+			die(); // throwing wasn't working with console so just doing this
 			throw new XenForo_Exception($errorString);
 		}
 	}

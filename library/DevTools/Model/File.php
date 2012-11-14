@@ -5,8 +5,8 @@ class DevTools_Model_File extends XenForo_Model
 	public function runFullSync()
 	{
 		//$this->writeAllFiles();die();
-		$this->syncTemplates('DevTools_File_Template_Admin', -1);
-		$this->syncTemplates('DevTools_File_Template_Master', 0);
+		//$this->syncTemplates('DevTools_File_Template_Admin', -1);
+		//$this->syncTemplates('DevTools_File_Template_Master', 0);
 
 		foreach ($this->getModelFromCache('XenForo_Model_AddOn')->getAllAddOns() AS $addon)
 		{
@@ -30,10 +30,9 @@ class DevTools_Model_File extends XenForo_Model
 		{
 			$files[$phrase['phrase_id']] = array_merge($phrase, array(
 				'id' => $phrase['phrase_id'],
-				'dbName' => XenForo_Application::getConfig()->db->dbname,
+				'title' => $phrase['title'],
 				'contents' => $phrase['phrase_text'],
 				'lastModifiedTime' => $phrase['last_file_update'],
-				'attributes' => array(),
 			));
 
 			$files[$phrase['phrase_id']]['fileName'] = $phraseFile->getFileName($files[$phrase['phrase_id']]);
@@ -80,14 +79,10 @@ class DevTools_Model_File extends XenForo_Model
 		foreach ($phrases AS $phrase)
 		{
 			$filePath = $phraseFile->getDirectory($phrase) . DIRECTORY_SEPARATOR . $phraseFile->getFileName($phrase);
-			$attributes = array(
-				'id' => $phrase['phrase_id'],
-				'dbName' => XenForo_Application::getConfig()->db->dbname
-			);
-			if (!file_exists($filePath))
+			if ( ! file_exists($filePath))
 			{
 				$phraseFile->printDebugInfo('Writing ' . $phraseFile->getDataType() . ' "' . $phrase['title'] . '" to ' . $filePath . '...');
-				DevTools_Helper_File::write($filePath, $phrase['phrase_text'], $attributes);
+				DevTools_Helper_File::write($filePath, $phrase['phrase_text']);
 
 				$file = new DevTools_File_Phrase($filePath);
 				$file->touchDb();
@@ -198,24 +193,16 @@ class DevTools_Model_File extends XenForo_Model
 
 			if ($file->isFile())
 			{
-				$id = (int) xattr_get($file->getPathname(), 'id');
-				if (!$id OR !isset($files[$id]) OR $files[$id]['filePath'] != $file->getPathname())
+				list($title, $id) = DevTools_Helper_File::getIdAndTitleFromFileName($file->getFileName());
+				if ( ! $id OR ! isset($files[$id]) OR $files[$id]['filePath'] != $file->getPathname())
 				{
-					$list = xattr_list($file->getPathname());
-					$attributes = array();
-					foreach ($list AS $attr)
-					{
-						$attributes[$attr] = xattr_get($file->getPathname(), $attr);
-					}
-
 					$files[-count($files) - 1] = array(
 						'id' => $id,
-						'dbName' => xattr_get($file->getPathname(), 'dbName'),
+						'title' => $title,
 						'fileName' => $file->getFilename(),
 						'filePath' => $file->getPathname(),
 						'contents' => file_get_contents($file->getPathname()),
 						'lastModifiedTime' => $file->getMTime(),
-						'attributes' => xattr_list($file->getPathname()),
 					);
 				}
 			}

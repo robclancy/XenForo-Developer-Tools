@@ -1,0 +1,17 @@
+{
+	"addon":	{
+		"id":	"devTools",
+		"name":	"Dev Tools",
+		"namespace":	"DevTools",
+		"path":	"library/DevTools"
+	},
+	"paths":	{
+		"/home/robbo/Projects/donation-manager/xf/1.1.3/repos/XenForo-Developer-Tools/addon-devTools.xml":	"/home/robbo/Projects/donation-manager/xf/1.1.3/addon-devTools.xml",
+		"/home/robbo/Projects/donation-manager/xf/1.1.3/repos/XenForo-Developer-Tools/filesync.php":	"/home/robbo/Projects/donation-manager/xf/1.1.3/filesync.php",
+		"/home/robbo/Projects/donation-manager/xf/1.1.3/repos/XenForo-Developer-Tools/TODO":	"/home/robbo/Projects/donation-manager/xf/1.1.3/TODO",
+		"/home/robbo/Projects/donation-manager/xf/1.1.3/repos/XenForo-Developer-Tools/templatesync.php":	"/home/robbo/Projects/donation-manager/xf/1.1.3/templatesync.php",
+		"/home/robbo/Projects/donation-manager/xf/1.1.3/repos/XenForo-Developer-Tools/library/DevTools":	"/home/robbo/Projects/donation-manager/xf/1.1.3/library/DevTools"
+	},
+	"importUrl":	"https://github.com/Robbo-/XenForo-Developer-Tools.git",
+	"importPath":	"/home/robbo/Projects/donation-manager/xf/1.1.3/repos/XenForo-Developer-Tools"
+}

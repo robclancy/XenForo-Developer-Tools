@@ -42,8 +42,9 @@ class DevTools_File_Phrase extends DevTools_File_Abstract
 
 	protected function _updateDb()
 	{
+		list ($title, $id) = DevTools_Helper_File::getIdAndTitleFromFileName($this->_data['fileName']);
 		$data = array(
-			'title' => str_replace('.txt', '', str_replace('.global.txt', '', $this->_data['fileName'])),
+			'title' => $title,
 			'phrase_text' => $this->_data['contents'],
 			'language_id' => 0,
 			'global_cache' => $this->_data['global_cache'],
@@ -53,18 +54,19 @@ class DevTools_File_Phrase extends DevTools_File_Abstract
 		if (!$this->_getPhraseModel()->canModifyPhraseInLanguage($data['language_id']))
 		{
 			$this->printDebugInfo('E: ' . new XenForo_Phrase('this_phrase_can_not_be_modified') . "\n");
-			return 0;//$this->responseError(new XenForo_Phrase('this_phrase_can_not_be_modified'));
+			return 0;
 		}
 
 		$writer = XenForo_DataWriter::create('XenForo_DataWriter_Phrase');
+		$writer->setOption(XenForo_DataWriter_Phrase::OPTION_DATA_FROM_FILE, true);
 
-		if (!$this->isNewFile())
+		if ( ! $this->isNewFile())
 		{
 			$writer->setExistingData($this->_data['id']);
 		}
 
 		$writer->bulkSet($data);
-		if ($writer->isChanged('title') || $writer->isChanged('phrase_text') || $writer->get('language_id') > 0)
+		if ($writer->isChanged('title') OR $writer->isChanged('phrase_text') OR $writer->get('language_id') > 0)
 		{
 			$writer->updateVersionId();
 		}
@@ -84,7 +86,7 @@ class DevTools_File_Phrase extends DevTools_File_Abstract
 
 		$writer->save();
 
-		if (!$this->isNewfile())
+		if ( ! $this->isNewfile())
 		{
 			$this->printDebugInfo("- phrase updated in database\n");
 		}
@@ -97,6 +99,7 @@ class DevTools_File_Phrase extends DevTools_File_Abstract
 		parent::_deleteFileFromDb($oldData);
 
 		$dw = XenForo_DataWriter::create('XenForo_DataWriter_Phrase');
+		$dw->setOption(XenForo_DataWriter_Phrase::OPTION_DATA_FROM_FILE, true);
 		$dw->setExistingData($oldData['id']);
 		try
 		{
@@ -114,13 +117,79 @@ class DevTools_File_Phrase extends DevTools_File_Abstract
 		$dw->delete();
 	}
 
-	public function touchDb()
+	public function touchDb($id = null)
 	{
 		XenForo_Application::getDb()->query('
 			UPDATE xf_phrase
 			SET last_file_update = ?
 			WHERE phrase_id = ?
-		', array(XenForo_Application::$time, $this->_data['id']));
+		', array(XenForo_Application::$time, $id ? $id : $this->_data['id']));
+	}
+
+	public static function postDataWriterSave(XenForo_DataWriter $writer, array $extraData = array())
+	{
+		$self = new self();
+
+		$oldPath = false;
+		$oldData = array_merge($writer->getMergedExistingData(), array('id' => $writer->get('phrase_id')));
+		if ($writer->isUpdate())
+		{
+			$oldPath = $self->getDirectory($writer->getMergedExistingData()) . self::$s . $self->getFileName($oldData);
+		}
+
+		$newPath = false;
+		$newData = array_merge($writer->getMergedData(), array('id' => $writer->get('phrase_id')));
+		if ($writer->isChanged('addon_id') OR $writer->isChanged('title'))
+		{
+			$newPath = $self->getDirectory($newData) . self::$s . $self->getFileName($newData);
+		}
+
+		if ( ! $oldPath)
+		{
+			$oldPath = $newPath;
+		}
+
+		if ( ! DevTools_Helper_File::write($oldPath, $writer->get('phrase_text'), array('id' => $writer->get('phrase_id'))))
+		{
+			throw new XenForo_Exception("Failed to write phrase file to $oldPath");
+			return;
+		}
+
+		if ($newPath && $oldPath)
+		{
+			rename($oldPath, $newPath);
+		}
+
+		$self->touchDb();
+	}
+
+	public static function postDataWriterDelete(XenForo_DataWriter $writer, array $extraData = array())
+	{
+		/*if (!isset($extraData['styleId']) || !isset($extraData['self']))
+		{
+			return;
+		}
+
+		$styleId = $extraData['styleId'];
+		$self = $extraData['self'];
+
+		$contents = XenForo_Model::create('XenForo_Model_StyleProperty')->replacePropertiesInTemplateForEditor(
+			$writer->get('template'), $styleId,
+			$self->getPropertiesInStyle($styleId)
+		);
+		$contents = XenForo_Model::create('XenForo_Model_Template')->replaceIncludesWithLinkRel($contents);
+
+		$self->trashFile(array(
+			'id' => $writer->get('template_id'),
+			'contents' => $contents,
+			'addon_id' => $writer->get('addon_id'),
+			'fileName' => $self->getFileName($writer->getMergedData()),
+			'title' => $writer->get('title')
+		));
+
+		unlink($self->getDirectory($writer->getMergedData()) . self::$s . $self->getFileName($writer->getMergedData()));
+
+		$self->touchDb();*/
 	}
 
 	public function getDirectory(array $data = array())
@@ -137,7 +206,7 @@ class DevTools_File_Phrase extends DevTools_File_Abstract
 
 	public function getFileName(array $data)
 	{
-		return $data['title'] . (empty($data['global_cache']) ? '' : '.global') . '.txt';
+		return $data['title'] . (empty($data['id']) ? '' : '.' . $data['id']) . (empty($data['global_cache']) ? '' : '.global') . '.txt';
 	}
 
 	public function getOriginalFiles()

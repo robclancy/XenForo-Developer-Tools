@@ -186,6 +186,7 @@ abstract class DevTools_File_Template extends DevTools_File_Abstract
 		if (!DevTools_Helper_File::write($oldPath, $contents, array('id' => $writer->get('template_id'), 'dbName' => XenForo_Application::getConfig()->db->dbname)))
 		{
 			throw new XenForo_Exception("Failed to write template file to $oldPath");
+			return;
 		}
 
 		if ($newPath && $oldPath)

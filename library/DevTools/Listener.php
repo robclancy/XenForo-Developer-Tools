@@ -18,7 +18,8 @@ class DevTools_Listener
 		// Note: the autoloader will extend these itself so we return above
 		$extendedClasses = array(
 			'XenForo_DataWriter_Template',
-			'XenForo_DataWriter_AdminTemplate'
+			'XenForo_DataWriter_AdminTemplate',
+			'XenForo_DataWriter_Phrase',
 		);
 
 		foreach ($extendedClasses AS $extendedClass)

@@ -10,44 +10,24 @@ abstract class DevTools_Helper_File
 		self::createDirectory(dirname($filePath));
 		self::makeWritableByFtpUser(dirname($filePath));
 
-		/* DEPREACTED: Attributes depracted
-		if (file_exists($filePath))
-		{
-			if (!isset($attributes['id']) || xattr_get($filePath, 'id') != $attributes['id'])
-			{
-				return false;
-			}
-		}*/
-
 		if (empty($contents))
 		{
-			if (!touch($filePath))
+			if ( ! touch($filePath))
 			{
 				return false;
 			}
 		}
 		else
 		{
-			if (!file_put_contents($filePath, $contents))
+			if ( ! file_put_contents($filePath, $contents))
 			{
 				return false;
 			}
 		}
 
-		/*foreach ($attributes AS $name => $value)
-		{
-			xattr_set($filePath, $name, $value, $flags);
-		}*/
-
 		self::makeWritableByFtpUser($filePath);
 
 		return true;
-	}
-
-	public static function updateAttribute($filePath, $name, $value, $flags = 0)
-	{
-		self::makeWritableByFtpUser($filePath);
-		xattr_set($filePath, $name, $value, $flags);
 	}
 
 	public static function createDirectory($path, $createIndexHtml = false)
@@ -86,6 +66,9 @@ abstract class DevTools_Helper_File
 		// So we check for first '.' and if there is a second one get what is inbetween for the id
 		// if it is an int that is it, if not it must be a new file
 
+		// Special case for CSS files
+		$suffix = strpos($fileName, '.css') !== false ? '.css' : '';
+
 		if (($pos = strpos($fileName, '.')) !== false)
 		{
 			$id = 0;
@@ -94,9 +77,9 @@ abstract class DevTools_Helper_File
 				$id = (int) substr($fileName, $pos + 1, $pos2 - $pos);
 			}
 
-			return array(substr($fileName, 0, $pos), $id);
+			return array(substr($fileName, 0, $pos). $suffix, $id);
 		}
 
-		return array($fileName, 0);
+		return array($fileName . $suffix, 0);
 	}
 }

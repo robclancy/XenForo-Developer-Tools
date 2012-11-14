@@ -280,18 +280,6 @@ abstract class DevTools_File_Abstract
 
 	abstract public function getDirectory(array $data = array());
 
-	protected function _getFileAttributes($path)
-	{
-		$list = xattr_list($path);
-		$attributes = array();
-		foreach ($list AS $attr)
-		{
-			$attributes[$attr] = xattr_get($path, $attr);
-		}
-
-		return $attributes;
-	}
-
 	// For CLI and debug use
 	public function printDebugInfo($str)
 	{

@@ -165,31 +165,18 @@ class DevTools_File_Phrase extends DevTools_File_Abstract
 
 	public static function postDataWriterDelete(XenForo_DataWriter $writer, array $extraData = array())
 	{
-		/*if (!isset($extraData['styleId']) || !isset($extraData['self']))
-		{
-			return;
-		}
+		$self = new self();
 
-		$styleId = $extraData['styleId'];
-		$self = $extraData['self'];
-
-		$contents = XenForo_Model::create('XenForo_Model_StyleProperty')->replacePropertiesInTemplateForEditor(
-			$writer->get('template'), $styleId,
-			$self->getPropertiesInStyle($styleId)
-		);
-		$contents = XenForo_Model::create('XenForo_Model_Template')->replaceIncludesWithLinkRel($contents);
-
-		$self->trashFile(array(
-			'id' => $writer->get('template_id'),
-			'contents' => $contents,
+		$phrase = array(
+			'id' => $writer->get('phrase_id'),
+			'contents' => $writer->get('phrase_text'),
 			'addon_id' => $writer->get('addon_id'),
-			'fileName' => $self->getFileName($writer->getMergedData()),
 			'title' => $writer->get('title')
-		));
+		);
+		$phrase['fileName'] = $self->getFileName($phrase);
+		$self->trashFile($phrase);
 
-		unlink($self->getDirectory($writer->getMergedData()) . self::$s . $self->getFileName($writer->getMergedData()));
-
-		$self->touchDb();*/
+		unlink($self->getDirectory($phrase) . self::$s . $phrase['fileName']);
 	}
 
 	public function getDirectory(array $data = array())

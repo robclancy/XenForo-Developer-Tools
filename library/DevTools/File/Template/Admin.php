@@ -14,7 +14,7 @@ class DevTools_File_Template_Admin extends DevTools_File_Template
 		return 'admin';
 	}
 
-	public function touchDb()
+	public function touchDb($id = null)
 	{
 		$this->templateTouchDb(-1);
 	}

@@ -5,8 +5,8 @@ class DevTools_Model_File extends XenForo_Model
 	public function runFullSync()
 	{
 		//$this->writeAllFiles();die();
-		//$this->syncTemplates('DevTools_File_Template_Admin', -1);
-		//$this->syncTemplates('DevTools_File_Template_Master', 0);
+		$this->syncTemplates('DevTools_File_Template_Admin', -1);
+		$this->syncTemplates('DevTools_File_Template_Master', 0);
 
 		foreach ($this->getModelFromCache('XenForo_Model_AddOn')->getAllAddOns() AS $addon)
 		{
@@ -78,6 +78,7 @@ class DevTools_Model_File extends XenForo_Model
 		$phraseFile = new DevTools_File_Phrase();
 		foreach ($phrases AS $phrase)
 		{
+			$phrase['id'] = $phrase['phrase_id'];
 			$filePath = $phraseFile->getDirectory($phrase) . DIRECTORY_SEPARATOR . $phraseFile->getFileName($phrase);
 			if ( ! file_exists($filePath))
 			{
@@ -104,13 +105,10 @@ class DevTools_Model_File extends XenForo_Model
 		$fileTemplate = new $fileClass();
 		foreach ($templates AS $template)
 		{
+			$template['id'] = $template['template_id'];
 			$filePath = $fileTemplate->getDirectory($template) . DIRECTORY_SEPARATOR . $fileTemplate->getFileName($template);
-			if (!file_exists($filePath))
+			if ( ! file_exists($filePath))
 			{
-				$attributes = array(
-					'id' => $template['template_id'],
-					'dbName' => XenForo_Application::getConfig()->db->dbname
-				);
 				$contents = $this->getModelFromCache('XenForo_Model_StyleProperty')->replacePropertiesInTemplateForEditor(
 					$template['template'], $styleId,
 					$fileTemplate->getPropertiesInStyle($styleId)
@@ -118,7 +116,7 @@ class DevTools_Model_File extends XenForo_Model
 				$contents = $this->getModelFromCache('XenForo_Model_Template')->replaceIncludesWithLinkRel($contents);
 
 				$fileTemplate->printDebugInfo('Writing ' . $fileTemplate->getDataType(). ' "' . $template['title'] . '" to ' . $filePath . '...');
-				DevTools_Helper_File::write($filePath, $contents, $attributes);
+				DevTools_Helper_File::write($filePath, $contents);
 				$file = new $fileClass($filePath);
 				$file->touchDb();
 				$fileTemplate->printDebugInfo(" done\n");
@@ -140,14 +138,13 @@ class DevTools_Model_File extends XenForo_Model
 		{
 			$files[$template['template_id']] = array_merge($template, array(
 				'id' => $template['template_id'],
-				'dbName' => XenForo_Application::getConfig()->db->name,
-				'fileName' => $fileTemplate->getFileName($template),
+				'title' => $template['title'],
 				'filePath' => $fileTemplate->getDirectory($template),
 				'contents' => $template['template'],
-				'lastModifiedTime' => $template['last_file_update'],
-				'attributes' => array()
+				'lastModifiedTime' => $template['last_file_update']
 			));
 
+			$files[$template['template_id']]['fileName'] = $fileTemplate->getFileName($files[$template['template_id']]);
 			$files[$template['template_id']]['filePath'] .= DIRECTORY_SEPARATOR . $files[$template['template_id']]['fileName'];
 		}
 

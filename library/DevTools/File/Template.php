@@ -45,7 +45,7 @@ abstract class DevTools_File_Template extends DevTools_File_Abstract
 		$dw = $this->_getDataWriter();
 		$new = $this->isNewFile();
 		$modified = ($new OR $this->isModified());
-		if (!$new)
+		if ( ! $new)
 		{
 			$dw->setExistingData($this->_data['id']);
 		}
@@ -55,7 +55,7 @@ abstract class DevTools_File_Template extends DevTools_File_Abstract
 			$dw->set('style_id', $styleId);
 		}
 
-		$title = $this->_data['fileName'];
+		list ($title, $id) = DevTools_Helper_File::getIdAndTitleFromFileName($this->_data['fileName']);
 		if (substr($title, -5) == '.html')
 		{
 			$title = substr($title, 0, -5);
@@ -106,7 +106,7 @@ abstract class DevTools_File_Template extends DevTools_File_Abstract
 
 		if ($modified)
 		{
-			if (!$new)
+			if ( ! $new)
 			{
 				$this->printDebugInfo("- updated template contents\n");
 			}
@@ -153,7 +153,7 @@ abstract class DevTools_File_Template extends DevTools_File_Abstract
 
 	public static function postDataWriterSave(XenForo_DataWriter $writer, array $extraData = array())
 	{
-		if (!isset($extraData['styleId']) || !isset($extraData['self']))
+		if ( ! isset($extraData['styleId']) || ! isset($extraData['self']))
 		{
 			return;
 		}
@@ -161,18 +161,20 @@ abstract class DevTools_File_Template extends DevTools_File_Abstract
 		$styleId = $extraData['styleId'];
 		$self = $extraData['self'];
 		$oldPath = false;
+		$oldData = array_merge($writer->getMergedExistingData(), array('id' => $writer->get('template_id')));
 		if ($writer->isUpdate())
 		{
-			$oldPath = $self->getDirectory($writer->getMergedExistingData()) . self::$s . $self->getFileName($writer->getMergedExistingData());
+			$oldPath = $self->getDirectory($writer->getMergedExistingData()) . self::$s . $self->getFileName($oldData);
 		}
 
 		$newPath = false;
+		$newData = array_merge($writer->getMergedData(), array('id' => $writer->get('template_id')));
 		if ($writer->isChanged('addon_id') OR $writer->isChanged('title'))
 		{
-			$newPath = $self->getDirectory($writer->getMergedData()) . self::$s . $self->getFileName($writer->getMergedData());
+			$newPath = $self->getDirectory($writer->getMergedData()) . self::$s . $self->getFileName($newData);
 		}
 
-		if (!$oldPath)
+		if ( ! $oldPath)
 		{
 			$oldPath = $newPath;
 		}
@@ -183,13 +185,13 @@ abstract class DevTools_File_Template extends DevTools_File_Abstract
 		);
 		$contents = XenForo_Model::create('XenForo_Model_Template')->replaceIncludesWithLinkRel($contents);
 
-		if (!DevTools_Helper_File::write($oldPath, $contents, array('id' => $writer->get('template_id'), 'dbName' => XenForo_Application::getConfig()->db->dbname)))
+		if ( ! DevTools_Helper_File::write($oldPath, $contents, array('id' => $writer->get('template_id'), 'dbName' => XenForo_Application::getConfig()->db->dbname)))
 		{
 			throw new XenForo_Exception("Failed to write template file to $oldPath");
 			return;
 		}
 
-		if ($newPath && $oldPath)
+		if ($newPath AND $oldPath)
 		{
 			rename($oldPath, $newPath);
 		}
@@ -213,15 +215,16 @@ abstract class DevTools_File_Template extends DevTools_File_Abstract
 		);
 		$contents = XenForo_Model::create('XenForo_Model_Template')->replaceIncludesWithLinkRel($contents);
 
-		$self->trashFile(array(
+		$template = array(
 			'id' => $writer->get('template_id'),
 			'contents' => $contents,
 			'addon_id' => $writer->get('addon_id'),
-			'fileName' => $self->getFileName($writer->getMergedData()),
 			'title' => $writer->get('title')
-		));
+		);
+		$template['fileName'] = $self->getFileName($template);
+		$self->trashFile($template);
 
-		unlink($self->getDirectory($writer->getMergedData()) . self::$s . $self->getFileName($writer->getMergedData()));
+		unlink($self->getDirectory($writer->getMergedData()) . self::$s . $template['fileName']);
 
 		$self->touchDb();
 	}
@@ -239,9 +242,15 @@ abstract class DevTools_File_Template extends DevTools_File_Abstract
 
 	public function getFileName(array $data)
 	{
-		if (strpos($data['title'], '.') === false)
+		if (strpos($data['title'], '.html') === false AND strpos($data['title'], '.css') === false)
 		{
-			return $data['title'] . '.html';
+			$data['title'] .= '.html';
+		}
+
+		if ($data['id'])
+		{
+			$pos = strpos($data['title'], '.');
+			$data['title'] = substr($data['title'], 0, $pos) . '.' . $data['id'] . substr($data['title'], $pos);
 		}
 
 		return $data['title'];

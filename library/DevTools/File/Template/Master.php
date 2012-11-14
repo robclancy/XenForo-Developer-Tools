@@ -14,7 +14,7 @@ class DevTools_File_Template_Master extends DevTools_File_Template
 		return 'master';
 	}
 
-	public function touchDb()
+	public function touchDb($id = null)
 	{
 		$this->templateTouchDb(0);
 	}
